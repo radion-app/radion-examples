@@ -17,34 +17,41 @@
  * Run:
  *   bun run websockets/08-resilient-client/index.ts
  */
-import { connect, type Frame } from "../../shared/radion-ws";
+import { connect } from "../../shared/radion-ws";
+import type { Frame } from "../../shared/radion-ws";
 
 let events = 0;
-let reconnects = -1; // first "connecting" isn't a reconnect
+// first "connecting" isn't a reconnect
+let reconnects = -1;
 
 const client = connect({
-  subscriptions: [{ id: "g", channel: "global" }],
+  onError: (f: Frame) => {
+    if (f.code === "lagged") {
+      console.warn(`lagged: ${f.skipped} events dropped, reconnecting`);
+    } else {
+      console.error("error:", f.code, f.message);
+    }
+  },
+  onEvent: () => {
+    events += 1;
+  },
   onStatus: (s, detail) => {
-    if (s === "reconnecting") reconnects++;
+    if (s === "reconnecting") {
+      reconnects += 1;
+    }
     console.log(`[status] ${s}${detail ? ` (${detail})` : ""}`);
     if (s === "fatal") {
       console.error("Fatal: API key revoked or revalidation failed. Stopping.");
       process.exit(1);
     }
   },
-  onError: (f: Frame) => {
-    if (f.code === "lagged") console.warn(`lagged: ${f.skipped} events dropped, reconnecting`);
-    else console.error("error:", f.code, f.message);
-  },
-  onEvent: () => {
-    events++;
-  },
+  subscriptions: [{ channel: "global", id: "g" }],
 });
 
 // Periodic throughput report.
 setInterval(() => {
   console.log(`events=${events}  reconnects=${Math.max(0, reconnects)}`);
-}, 5_000);
+}, 5000);
 
 // Clean shutdown on Ctrl-C.
 process.on("SIGINT", () => {

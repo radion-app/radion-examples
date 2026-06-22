@@ -11,16 +11,15 @@
  * Run:
  *   bun run websockets/07-resolution-watcher/index.ts
  */
-import { connect, short, type Frame } from "../../shared/radion-ws";
+import { connect, short } from "../../shared/radion-ws";
+import type { Frame } from "../../shared/radion-ws";
 
 // Oracle event types that signal the resolution lifecycle moving forward.
-const INTERESTING = /resolve|propose|settle|price|answer|dispute/i;
+const INTERESTING = /resolve|propose|settle|price|answer|dispute/iu;
 
 console.log("Watching oracle resolutions…");
 
 connect({
-  subscriptions: [{ id: "oracle", channel: "oracle" }],
-  onStatus: (s) => console.log(`[${s}]`),
   onError: (f: Frame) => console.error("error:", f.code, f.message),
   onEvent: (d) => {
     const type = d?.type ?? "unknown";
@@ -29,4 +28,6 @@ connect({
     const flag = INTERESTING.test(type) ? "⚑" : "·";
     console.log(`${flag} ${time}  ${type}  ${short(id)}`);
   },
+  onStatus: (s) => console.log(`[${s}]`),
+  subscriptions: [{ channel: "oracle", id: "oracle" }],
 });

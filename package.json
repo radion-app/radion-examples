@@ -2,15 +2,11 @@
   "name": "radion-examples",
   "version": "0.0.1",
   "private": true,
-  "type": "module",
   "description": "Runnable examples for building on Radion's live Polymarket WebSocket data, using Bun.",
-  "engines": {
-    "bun": ">=1.4.0"
-  },
-  "devDependencies": {
-    "bun-types": "latest"
-  },
+  "type": "module",
   "scripts": {
+    "fix": "ultracite fix",
+    "check": "ultracite check",
     "typecheck": "tsc --noEmit",
     "copytrade": "bun run websockets/01-copytrading-mirror/index.ts",
     "wallet-alerts": "bun run websockets/02-wallet-alerts/index.ts",
@@ -20,5 +16,16 @@
     "mempool": "bun run websockets/06-mempool-early-alerts/index.ts",
     "resolutions": "bun run websockets/07-resolution-watcher/index.ts",
     "resilient": "bun run websockets/08-resilient-client/index.ts"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "oxfmt": "^0.55.0",
+    "oxlint": "^1.70.0",
+    "oxlint-tsgolint": "^0.23.0",
+    "typescript": "^5.6.0",
+    "ultracite": "^7.8.3"
+  },
+  "engines": {
+    "bun": ">=1.4.0"
   }
 }

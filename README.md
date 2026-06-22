@@ -14,8 +14,8 @@ bun run copytrade -- 0xWALLET
 
 ## What's here
 
-| Area | Folder | Examples |
-| --- | --- | --- |
+| Area       | Folder                         | Examples                                                                                                            |
+| ---------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | WebSockets | [`websockets/`](./websockets/) | Copytrading, wallet alerts, whale feed, price ticker, market monitor, mempool, resolution watcher, resilient client |
 
 The REST API can get its own top-level folder later.
@@ -45,24 +45,24 @@ bun run websockets/01-copytrading-mirror/index.ts 0xWALLET
 bun run copytrade -- 0xWALLET
 ```
 
-| Script | Example | Args |
-| --- | --- | --- |
-| `bun run copytrade` | Copytrading mirror | `0xWALLET…` |
-| `bun run wallet-alerts` | Wallet alerts | `0xWALLET…` |
-| `bun run whales` | Whale trade feed | `[minUsd]` |
-| `bun run ticker` | Live price ticker | `[0xTOKEN…]` |
-| `bun run market` | Single-market monitor | `--market 0x… \| --token 0x…` |
-| `bun run mempool` | Mempool early alerts | — |
-| `bun run resolutions` | Resolution watcher | — |
-| `bun run resilient` | Resilient client | — |
+| Script                  | Example               | Args                          |
+| ----------------------- | --------------------- | ----------------------------- |
+| `bun run copytrade`     | Copytrading mirror    | `0xWALLET…`                   |
+| `bun run wallet-alerts` | Wallet alerts         | `0xWALLET…`                   |
+| `bun run whales`        | Whale trade feed      | `[minUsd]`                    |
+| `bun run ticker`        | Live price ticker     | `[0xTOKEN…]`                  |
+| `bun run market`        | Single-market monitor | `--market 0x… \| --token 0x…` |
+| `bun run mempool`       | Mempool early alerts  | —                             |
+| `bun run resolutions`   | Resolution watcher    | —                             |
+| `bun run resilient`     | Resilient client      | —                             |
 
 ## Endpoints used
 
-| | |
-| --- | --- |
-| WebSocket | `wss://api.radion.app/ws` |
-| Health | `GET https://api.radion.app/health` |
-| Docs | https://docs.radion.app/websockets/overview |
+|               |                                             |
+| ------------- | ------------------------------------------- |
+| WebSocket     | `wss://api.radion.app/ws`                   |
+| Health        | `GET https://api.radion.app/health`         |
+| Documentation | https://docs.radion.app/websockets/overview |
 
 ## Repo layout
 
