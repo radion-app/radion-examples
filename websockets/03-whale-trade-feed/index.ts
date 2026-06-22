@@ -42,8 +42,8 @@ connect({
     const usd = hexToUsdc(d.takerAmountFilled);
     board.push({
       at: new Date().toISOString().slice(11, 19),
-      taker: d.taker,
-      token: d.tokenId,
+      taker: d.taker ?? "",
+      token: d.tokenId ?? "",
       usd,
     });
     if (board.length > 200) {

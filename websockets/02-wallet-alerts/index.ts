@@ -12,7 +12,7 @@
  *   bun run websockets/02-wallet-alerts/index.ts 0xWALLET [0xWALLET...]
  */
 import { connect, short } from "../../shared/radion-ws";
-import type { Frame } from "../../shared/radion-ws";
+import type { EventData, Frame } from "../../shared/radion-ws";
 
 const wallets = process.argv.slice(2);
 if (wallets.length === 0) {
@@ -21,8 +21,8 @@ if (wallets.length === 0) {
 }
 
 // Friendly one-line summaries per event type; fall back to the raw type.
-const describe = (d: any): string => {
-  switch (d?.type) {
+const describe = (d: EventData): string => {
+  switch (d.type) {
     case "order_filled_v1":
     case "order_filled_v2": {
       return `traded ${short(d.tokenId)} (${d.side === 1 ? "sell" : "buy"})`;

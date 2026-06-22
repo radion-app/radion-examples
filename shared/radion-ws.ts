@@ -27,11 +27,44 @@ export interface Subscription {
   filters?: Filters;
 }
 
+/**
+ * Decoded event payload. The fields used by the examples are typed; every other
+ * key stays `unknown` via the index signature. See the per-channel schemas at
+ * https://docs.radion.app/websockets/channels/overview for the full shapes.
+ */
+export interface EventData {
+  /** snake_case event discriminator. Absent on `prices` frames. */
+  type?: string;
+  // exchange fills (trades / large_trades)
+  orderHash?: string;
+  maker?: string;
+  taker?: string;
+  side?: number;
+  tokenId?: string;
+  makerAmountFilled?: string;
+  takerAmountFilled?: string;
+  // collateral / position lifecycle
+  from?: string;
+  to?: string;
+  conditionId?: string;
+  // prices
+  token_id?: string;
+  price?: number;
+  timestamp_ms?: number;
+  // oracle
+  questionId?: string;
+  // mempool
+  transaction_hash?: string;
+  seen_at_ms?: number;
+  call?: { method?: string };
+  [key: string]: unknown;
+}
+
 export interface Frame {
   type: string;
   id?: string;
   channel?: string;
-  data?: any;
+  data?: EventData;
   code?: string;
   message?: string;
   skipped?: number;
@@ -48,7 +81,7 @@ export interface ConnectOptions {
   /** One or more subscriptions, re-sent automatically on reconnect. */
   subscriptions: Subscription[];
   /** Called for every `event` frame with the decoded `data` payload. */
-  onEvent: (data: any, frame: Frame) => void;
+  onEvent: (data: EventData, frame: Frame) => void;
   /** Optional: control frames (`subscribed`, `unsubscribed`, `pong`). */
   onControl?: (frame: Frame) => void;
   /** Optional: error frames (`unknown_channel`, `lagged`, `subscription_limit`, ...). */
@@ -111,7 +144,7 @@ export const connect = (opts: ConnectOptions): RadionClient => {
   const open = () => {
     status(backoff === MIN_BACKOFF_MS ? "connecting" : "reconnecting");
     // Bun's native WebSocket accepts custom upgrade headers.
-    ws = new WebSocket(url, { headers: { "X-API-Key": apiKey } } as any);
+    ws = new WebSocket(url, { headers: { "X-API-Key": apiKey } });
 
     ws.addEventListener("open", () => {
       backoff = MIN_BACKOFF_MS;
@@ -138,7 +171,7 @@ export const connect = (opts: ConnectOptions): RadionClient => {
       }
       switch (frame.type) {
         case "event": {
-          opts.onEvent(frame.data, frame);
+          opts.onEvent(frame.data ?? {}, frame);
           break;
         }
         case "error": {

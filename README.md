@@ -85,14 +85,3 @@ radion-examples/
     ├── 07-resolution-watcher/
     └── 08-resilient-client/
 ```
-
-## Conventions
-
-- One example per folder: a single `index.ts`.
-- Every example imports `connect()` from [`shared/radion-ws.ts`](./shared/radion-ws.ts), so reconnect, backoff, heartbeat, and resubscribe handling lives in one place.
-- Keys come from the environment only — never hard-coded, never in the URL query string (see [auth](https://docs.radion.app/websockets/authentication)).
-
-## Notes
-
-- WebSocket usage does **not** count against REST rate limits; the Free plan allows 1 connection / 2 subscriptions, so examples use at most 2 subscriptions.
-- The `mempool` example stays quiet until the production mempool source is provisioned; the confirmed channels it pairs with still stream.

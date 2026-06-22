@@ -43,6 +43,9 @@ console.log(
 connect({
   onError: (f: Frame) => console.error("error:", f.code, f.message),
   onEvent: (d) => {
+    if (d.token_id === undefined || d.price === undefined) {
+      return;
+    }
     const prev = last.get(d.token_id)?.price;
     const dir = moveArrow(d.price, prev);
     last.set(d.token_id, { dir, price: d.price });

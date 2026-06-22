@@ -2,7 +2,7 @@
 
 Real use cases built on the Radion WebSocket (`wss://api.radion.app/ws`). Each example is a single Bun file driven by one or two channel subscriptions, built on the shared [`connect()`](../shared/radion-ws.ts) client.
 
-## Channel → use-case map
+## Use cases
 
 | Channel                     | Filter                   | Example                                               |
 | --------------------------- | ------------------------ | ----------------------------------------------------- |
@@ -85,5 +85,3 @@ bun run 08-resilient-client/index.ts
 ## Reference
 
 [Overview](https://docs.radion.app/websockets/overview) · [Subscribe](https://docs.radion.app/websockets/subscribe) · [Frames](https://docs.radion.app/websockets/frames) · [Channels](https://docs.radion.app/websockets/channels/overview) · [Filters](https://docs.radion.app/websockets/filters) · [Mempool](https://docs.radion.app/websockets/mempool) · [Connection state](https://docs.radion.app/websockets/connection-state)
-
-Free plan = 1 connection / 2 subscriptions. Every example here uses at most 2 subscriptions.
