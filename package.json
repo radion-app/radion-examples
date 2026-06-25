@@ -18,7 +18,7 @@
     "resilient": "tsx --env-file-if-exists=.env websockets/08-resilient-client/index.ts"
   },
   "dependencies": {
-    "@radion-app/sdk": "^0.2.1"
+    "@radion-app/sdk": "^0.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
