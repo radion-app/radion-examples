@@ -55,7 +55,7 @@ export const requireApiKey = (): string => {
   const apiKey = process.env.RADION_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "Missing RADION_API_KEY. Copy .env.example to .env and set your key (https://radion.app).",
+      "Missing RADION_API_KEY. Copy .env.example to .env and set your key (https://radion.app)."
     );
   }
   return apiKey;
@@ -67,14 +67,14 @@ export const requireApiKey = (): string => {
  */
 export const onStatus = (
   realtime: RealtimeClient,
-  report: (status: string, detail?: string) => void,
+  report: (status: string, detail?: string) => void
 ): void => {
   realtime.on("open", () => report("open"));
   realtime.on("close", ({ code, reason }) =>
-    report("closed", `${code}${reason ? ` ${reason}` : ""}`),
+    report("closed", `${code}${reason ? ` ${reason}` : ""}`)
   );
   realtime.on("reconnect", ({ attempt, delayMs }) =>
-    report("reconnecting", `#${attempt} in ${delayMs}ms`),
+    report("reconnecting", `#${attempt} in ${delayMs}ms`)
   );
 };
 
