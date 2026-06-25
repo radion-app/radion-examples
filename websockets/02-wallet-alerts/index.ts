@@ -12,15 +12,9 @@
  *   tsx --env-file-if-exists=.env websockets/02-wallet-alerts/index.ts 0xWALLET [0xWALLET...]
  */
 import { Radion } from "@radion-app/sdk";
+import type { AnyConfirmedPayload } from "@radion-app/sdk";
 
-import {
-  errorCode,
-  onStatus,
-  payload,
-  requireApiKey,
-  short,
-} from "../../shared/utils";
-import type { EventData } from "../../shared/utils";
+import { errorCode, onStatus, requireApiKey, short } from "../../shared/utils";
 
 const wallets = process.argv.slice(2);
 if (wallets.length === 0) {
@@ -29,7 +23,7 @@ if (wallets.length === 0) {
 }
 
 // Friendly one-line summaries per event type; fall back to the raw type.
-const describe = (d: EventData): string => {
+const describe = (d: AnyConfirmedPayload): string => {
   switch (d.type) {
     case "order_filled_v1":
     case "order_filled_v2": {
@@ -53,7 +47,7 @@ const describe = (d: EventData): string => {
       return `redeemed on ${short(d.conditionId)}`;
     }
     default: {
-      return d?.type ?? "unknown";
+      return d.type;
     }
   }
 };
@@ -63,12 +57,12 @@ console.log(`Watching ${wallets.length} wallet(s) for any activity…`);
 const radion = new Radion({ apiKey: requireApiKey() });
 
 onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.on("error", (err) =>
-  console.error("error:", errorCode(err), err.message)
+radion.realtime.onLifecycle("error", (e) =>
+  console.error("error:", errorCode(e), e.message)
 );
-radion.realtime.on("event", (e) => {
+radion.realtime.onChannel("wallets", (e) => {
   const time = new Date().toISOString().slice(11, 19);
-  console.log(`🔔 ${time}  ${describe(payload(e))}`);
+  console.log(`🔔 ${time}  ${describe(e.data)}`);
 });
 
 radion.realtime.subscribe({

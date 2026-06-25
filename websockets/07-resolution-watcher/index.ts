@@ -13,13 +13,7 @@
  */
 import { Radion } from "@radion-app/sdk";
 
-import {
-  errorCode,
-  onStatus,
-  payload,
-  requireApiKey,
-  short,
-} from "../../shared/utils";
+import { errorCode, onStatus, requireApiKey, short } from "../../shared/utils";
 
 // Oracle event types that signal the resolution lifecycle moving forward.
 const INTERESTING = /resolve|propose|settle|price|answer|dispute/iu;
@@ -29,14 +23,13 @@ console.log("Watching oracle resolutions…");
 const radion = new Radion({ apiKey: requireApiKey() });
 
 onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.on("error", (err) =>
-  console.error("error:", errorCode(err), err.message)
+radion.realtime.onLifecycle("error", (e) =>
+  console.error("error:", errorCode(e), e.message)
 );
-radion.realtime.on("event", (e) => {
-  const d = payload(e);
-  const type = d?.type ?? "unknown";
+radion.realtime.onChannel("oracle", (e) => {
+  const { type, questionID } = e.data;
   const time = new Date().toISOString().slice(11, 19);
-  const id = d?.questionId ?? d?.conditionId ?? "";
+  const id = questionID ?? "";
   const flag = INTERESTING.test(type) ? "⚑" : "·";
   console.log(`${flag} ${time}  ${type}  ${short(id)}`);
 });

@@ -17,7 +17,6 @@ import {
   errorCode,
   hexToUsdc,
   onStatus,
-  payload,
   requireApiKey,
   short,
 } from "../../shared/utils";
@@ -34,13 +33,13 @@ console.log(`Mirroring ${wallets.length} wallet(s). Waiting for fills…`);
 const radion = new Radion({ apiKey: requireApiKey() });
 
 onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.on("error", (err) =>
-  console.error("error:", errorCode(err), err.message)
+radion.realtime.onLifecycle("error", (e) =>
+  console.error("error:", errorCode(e), e.message)
 );
-radion.realtime.on("event", (e) => {
-  const d = payload(e);
+radion.realtime.onChannel("trades", (e) => {
+  const d = e.data;
   // Only v2 fills carry side/tokenId; handle both fill variants.
-  const isFill = d?.type === "order_filled_v1" || d?.type === "order_filled_v2";
+  const isFill = d.type === "order_filled_v1" || d.type === "order_filled_v2";
   if (!isFill) {
     return;
   }

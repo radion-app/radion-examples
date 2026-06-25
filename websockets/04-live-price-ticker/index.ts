@@ -14,13 +14,7 @@
  */
 import { Radion } from "@radion-app/sdk";
 
-import {
-  errorCode,
-  onStatus,
-  payload,
-  requireApiKey,
-  short,
-} from "../../shared/utils";
+import { errorCode, onStatus, requireApiKey, short } from "../../shared/utils";
 
 const tokenIds = process.argv.slice(2);
 const last = new Map<string, { price: number; dir: string }>();
@@ -50,14 +44,11 @@ console.log(
 const radion = new Radion({ apiKey: requireApiKey() });
 
 onStatus(radion.realtime, (s) => s !== "open" && console.log(`[${s}]`));
-radion.realtime.on("error", (err) =>
-  console.error("error:", errorCode(err), err.message)
+radion.realtime.onLifecycle("error", (e) =>
+  console.error("error:", errorCode(e), e.message)
 );
-radion.realtime.on("event", (e) => {
-  const d = payload(e);
-  if (d.token_id === undefined || d.price === undefined) {
-    return;
-  }
+radion.realtime.onChannel("prices", (e) => {
+  const d = e.data;
   const prev = last.get(d.token_id)?.price;
   const dir = moveArrow(d.price, prev);
   last.set(d.token_id, { dir, price: d.price });

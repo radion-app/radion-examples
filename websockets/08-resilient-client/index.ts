@@ -29,16 +29,16 @@ let reconnects = 0;
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
-radion.realtime.on("open", () => console.log("[status] open"));
-radion.realtime.on("reconnect", ({ attempt, delayMs }) => {
+radion.realtime.onLifecycle("open", () => console.log("[status] open"));
+radion.realtime.onLifecycle("reconnect", ({ attempt, delayMs }) => {
   reconnects = attempt;
   console.log(`[status] reconnecting (#${attempt} in ${delayMs}ms)`);
 });
-radion.realtime.on("close", ({ code }) =>
+radion.realtime.onLifecycle("close", ({ code }) =>
   console.log(`[status] closed (${code})`)
 );
-radion.realtime.on("error", (err) => {
-  const code = errorCode(err);
+radion.realtime.onLifecycle("error", (e) => {
+  const code = errorCode(e);
   if (code === "lagged") {
     console.warn("lagged: fell behind the buffer, some events were dropped");
     return;
@@ -48,9 +48,9 @@ radion.realtime.on("error", (err) => {
     radion.realtime.close();
     process.exit(1);
   }
-  console.error("error:", code, err.message);
+  console.error("error:", code, e.message);
 });
-radion.realtime.on("event", () => {
+radion.realtime.onChannel("global", () => {
   events += 1;
 });
 

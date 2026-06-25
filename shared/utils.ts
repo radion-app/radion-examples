@@ -6,45 +6,7 @@
  * lifecycle-logging helper the examples build on.
  */
 import { RadionServerError } from "@radion-app/sdk";
-import type { ChannelEvent, RealtimeClient } from "@radion-app/sdk";
-
-/**
- * Decoded event payload. The fields used by the examples are typed; every other
- * key stays `unknown` via the index signature. See the per-channel schemas at
- * https://docs.radion.app/websockets/channels/overview for the full shapes.
- */
-export interface EventData {
-  /** snake_case event discriminator. Absent on `prices` frames. */
-  type?: string;
-  // exchange fills (trades / large_trades)
-  orderHash?: string;
-  maker?: string;
-  taker?: string;
-  side?: number;
-  tokenId?: string;
-  makerAmountFilled?: string;
-  takerAmountFilled?: string;
-  // collateral / position lifecycle
-  from?: string;
-  to?: string;
-  conditionId?: string;
-  // prices
-  token_id?: string;
-  price?: number;
-  timestamp_ms?: number;
-  // oracle
-  questionId?: string;
-  // mempool
-  transaction_hash?: string;
-  seen_at_ms?: number;
-  call?: { method?: string };
-  [key: string]: unknown;
-}
-
-/** Narrow an event's `unknown` payload to the example {@link EventData} shape. */
-export const payload = (event: ChannelEvent): EventData =>
-  // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-  event.data as EventData;
+import type { RealtimeClient } from "@radion-app/sdk";
 
 /** The server error code for an error, when it is a {@link RadionServerError}. */
 export const errorCode = (err: Error): string | undefined =>
@@ -69,11 +31,11 @@ export const onStatus = (
   realtime: RealtimeClient,
   report: (status: string, detail?: string) => void
 ): void => {
-  realtime.on("open", () => report("open"));
-  realtime.on("close", ({ code, reason }) =>
+  realtime.onLifecycle("open", () => report("open"));
+  realtime.onLifecycle("close", ({ code, reason }) =>
     report("closed", `${code}${reason ? ` ${reason}` : ""}`)
   );
-  realtime.on("reconnect", ({ attempt, delayMs }) =>
+  realtime.onLifecycle("reconnect", ({ attempt, delayMs }) =>
     report("reconnecting", `#${attempt} in ${delayMs}ms`)
   );
 };

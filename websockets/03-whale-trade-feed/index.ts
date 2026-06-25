@@ -16,7 +16,6 @@ import {
   errorCode,
   hexToUsdc,
   onStatus,
-  payload,
   requireApiKey,
   short,
 } from "../../shared/utils";
@@ -47,11 +46,11 @@ console.log("Connecting…");
 const radion = new Radion({ apiKey: requireApiKey() });
 
 onStatus(radion.realtime, (s) => s !== "open" && console.log(`[${s}]`));
-radion.realtime.on("error", (err) =>
-  console.error("error:", errorCode(err), err.message)
+radion.realtime.onLifecycle("error", (e) =>
+  console.error("error:", errorCode(e), e.message)
 );
-radion.realtime.on("event", (e) => {
-  const d = payload(e);
+radion.realtime.onChannel("large_trades", (e) => {
+  const d = e.data;
   const usd = hexToUsdc(d.takerAmountFilled);
   board.push({
     at: new Date().toISOString().slice(11, 19),

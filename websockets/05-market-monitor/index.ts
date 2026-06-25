@@ -14,13 +14,7 @@
  */
 import { Radion } from "@radion-app/sdk";
 
-import {
-  errorCode,
-  onStatus,
-  payload,
-  requireApiKey,
-  short,
-} from "../../shared/utils";
+import { errorCode, onStatus, requireApiKey, short } from "../../shared/utils";
 
 const [flag, value] = process.argv.slice(2);
 if ((flag !== "--market" && flag !== "--token") || !value) {
@@ -41,12 +35,11 @@ console.log(
 const radion = new Radion({ apiKey: requireApiKey() });
 
 onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.on("error", (err) =>
-  console.error("error:", errorCode(err), err.message)
+radion.realtime.onLifecycle("error", (e) =>
+  console.error("error:", errorCode(e), e.message)
 );
-radion.realtime.on("event", (e) => {
-  const d = payload(e);
-  const type = d?.type ?? "unknown";
+radion.realtime.onChannel("markets", (e) => {
+  const { type } = e.data;
   counts.set(type, (counts.get(type) ?? 0) + 1);
   const tally = [...counts.entries()].map(([t, c]) => `${t}:${c}`).join("  ");
   console.log(
