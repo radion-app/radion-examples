@@ -9,14 +9,22 @@
  * Docs: https://docs.radion.app/websockets/channels/overview#filtered-views
  *
  * Run:
- *   bun run websockets/02-wallet-alerts/index.ts 0xWALLET [0xWALLET...]
+ *   tsx --env-file-if-exists=.env websockets/02-wallet-alerts/index.ts 0xWALLET [0xWALLET...]
  */
-import { connect, short } from "../../shared/radion-ws";
-import type { EventData, Frame } from "../../shared/radion-ws";
+import { Radion } from "@radion-app/sdk";
+
+import {
+  errorCode,
+  onStatus,
+  payload,
+  requireApiKey,
+  short,
+} from "../../shared/utils";
+import type { EventData } from "../../shared/utils";
 
 const wallets = process.argv.slice(2);
 if (wallets.length === 0) {
-  console.error("Usage: bun run index.ts 0xWALLET [0xWALLET...]");
+  console.error("Usage: tsx index.ts 0xWALLET [0xWALLET...]");
   process.exit(1);
 }
 
@@ -52,12 +60,20 @@ const describe = (d: EventData): string => {
 
 console.log(`Watching ${wallets.length} wallet(s) for any activity…`);
 
-connect({
-  onError: (f: Frame) => console.error("error:", f.code, f.message),
-  onEvent: (d) => {
-    const time = new Date().toISOString().slice(11, 19);
-    console.log(`🔔 ${time}  ${describe(d)}`);
-  },
-  onStatus: (s) => console.log(`[${s}]`),
-  subscriptions: [{ channel: "wallets", filters: { wallets }, id: "alerts" }],
+const radion = new Radion({ apiKey: requireApiKey() });
+
+onStatus(radion.realtime, (s) => console.log(`[${s}]`));
+radion.realtime.on("error", (err) =>
+  console.error("error:", errorCode(err), err.message)
+);
+radion.realtime.on("event", (e) => {
+  const time = new Date().toISOString().slice(11, 19);
+  console.log(`🔔 ${time}  ${describe(payload(e))}`);
 });
+
+radion.realtime.subscribe({
+  channel: "wallets",
+  filters: { wallets },
+  id: "alerts",
+});
+await radion.realtime.connect();

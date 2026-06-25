@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "types": ["bun-types"],
+    "types": ["node"],
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "verbatimModuleSyntax": true
-  }
+    "verbatimModuleSyntax": true,
+  },
 }

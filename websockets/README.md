@@ -1,6 +1,6 @@
 # WebSocket Examples
 
-Real use cases built on the Radion WebSocket (`wss://api.radion.app/ws`). Each example is a single Bun file driven by one or two channel subscriptions, built on the shared [`connect()`](../shared/radion-ws.ts) client.
+Real use cases built on the Radion WebSocket (`wss://api.radion.app/ws`). Each example is a single Node.js + TypeScript file driven by one or two channel subscriptions, built on the realtime client from [`@radion-app/sdk`](https://github.com/radion-app/radion-typescript).
 
 ## Use cases
 
@@ -22,7 +22,7 @@ Real use cases built on the Radion WebSocket (`wss://api.radion.app/ws`). Each e
 Follow trader wallets; when a watched address fills an order, print the trade you'd mirror. The live counterpart to a copytrading backtest.
 
 ```bash
-bun run 01-copytrading-mirror/index.ts 0xWALLET [0xWALLET...]
+pnpm run copytrade 0xWALLET [0xWALLET...]
 ```
 
 ### 02 — Wallet alerts · `wallets` (wallets filter)
@@ -30,7 +30,7 @@ bun run 01-copytrading-mirror/index.ts 0xWALLET [0xWALLET...]
 Alert on **any** activity for watched addresses — trades, transfers, redemptions, splits, merges.
 
 ```bash
-bun run 02-wallet-alerts/index.ts 0xWALLET [0xWALLET...]
+pnpm run wallet-alerts 0xWALLET [0xWALLET...]
 ```
 
 ### 03 — Whale trade feed · `large_trades` (min_usd)
@@ -38,7 +38,7 @@ bun run 02-wallet-alerts/index.ts 0xWALLET [0xWALLET...]
 Rolling leaderboard of the biggest fills above a USD threshold.
 
 ```bash
-bun run 03-whale-trade-feed/index.ts [minUsd=10000]
+pnpm run whales [minUsd=10000]
 ```
 
 ### 04 — Live price ticker · `prices` (token_ids)
@@ -46,7 +46,7 @@ bun run 03-whale-trade-feed/index.ts [minUsd=10000]
 Continuously-updating last-traded price per token, with move direction.
 
 ```bash
-bun run 04-live-price-ticker/index.ts [0xTOKEN...]
+pnpm run ticker [0xTOKEN...]
 ```
 
 ### 05 — Single-market monitor · `markets` (market_ids/token_ids)
@@ -54,8 +54,8 @@ bun run 04-live-price-ticker/index.ts [0xTOKEN...]
 Everything happening on one market — fills, splits, merges, redemptions — with a per-type tally.
 
 ```bash
-bun run 05-market-monitor/index.ts --market 0xCONDITION_ID
-bun run 05-market-monitor/index.ts --token  0xTOKEN_ID
+pnpm run market --market 0xCONDITION_ID
+pnpm run market --token  0xTOKEN_ID
 ```
 
 ### 06 — Mempool early alerts · `mempool.trades` + `trades`
@@ -63,7 +63,7 @@ bun run 05-market-monitor/index.ts --token  0xTOKEN_ID
 Pending exchange transactions for early visibility, reconciled against confirmed trades by tx hash. Two subscriptions (fits the Free plan). _Quiet until the production mempool source is provisioned._
 
 ```bash
-bun run 06-mempool-early-alerts/index.ts
+pnpm run mempool
 ```
 
 ### 07 — Resolution watcher · `oracle`
@@ -71,15 +71,15 @@ bun run 06-mempool-early-alerts/index.ts
 Print the instant a market's outcome is proposed or resolved (UMA oracle lifecycle).
 
 ```bash
-bun run 07-resolution-watcher/index.ts
+pnpm run resolutions
 ```
 
-### 08 — Resilient client · shared helper
+### 08 — Resilient client · `@radion-app/sdk`
 
-A production-shaped connection: `X-API-Key` upgrade, exponential-backoff reconnect, resubscribe-on-reconnect, app-level ping, and `lagged` / `key_revoked` handling. This is the [`shared/radion-ws.ts`](../shared/radion-ws.ts) helper every other example imports, demonstrated standalone.
+A production-shaped connection: `X-API-Key` upgrade, exponential-backoff reconnect, resubscribe-on-reconnect, app-level ping, and `lagged` / `key_revoked` handling. This is the realtime client from [`@radion-app/sdk`](https://github.com/radion-app/radion-typescript) that every other example builds on, demonstrated standalone.
 
 ```bash
-bun run 08-resilient-client/index.ts
+pnpm run resilient
 ```
 
 ## Reference

@@ -2,14 +2,14 @@
 
 Real-world, runnable examples showing how to build on **[Radion](https://radion.app)** — live Polymarket onchain data, trader activity, market lifecycle, and price ticks over a single WebSocket.
 
-Built with **[Bun](https://bun.sh)** and TypeScript. No runtime dependencies — Bun's native `WebSocket` supports the `X-API-Key` upgrade header, so every example is a single file you can run directly.
+Built with **[Node.js](https://nodejs.org)** and TypeScript on top of the **[`@radion-app/sdk`](https://github.com/radion-app/radion-typescript)** package — connection, reconnect, heartbeat and resubscribe are handled by the SDK, so every example is a single focused file you can run directly. TypeScript runs through [`tsx`](https://tsx.is) with no build step.
 
 ```bash
 git clone https://github.com/radion-app/radion-examples
 cd radion-examples
 cp .env.example .env        # set RADION_API_KEY=rk_...
-bun install                 # dev types only
-bun run copytrade -- 0xWALLET
+pnpm install                # @radion-app/sdk + tsx + dev types
+pnpm run copytrade 0xWALLET
 ```
 
 ## What's here
@@ -22,7 +22,7 @@ The REST API can get its own top-level folder later.
 
 ## Prerequisites
 
-- [Bun](https://bun.sh) ≥ 1.4 — `curl -fsSL https://bun.sh/install | bash`
+- [Node.js](https://nodejs.org) ≥ 22 and [pnpm](https://pnpm.io) ≥ 9
 - A Radion API key (prefix `rk_`) — get one at [radion.app](https://radion.app). See [WebSocket auth](https://docs.radion.app/websockets/authentication).
 
 ## Setup
@@ -30,31 +30,31 @@ The REST API can get its own top-level folder later.
 ```bash
 cp .env.example .env
 # edit .env, set RADION_API_KEY=rk_...
-bun install
+pnpm install
 ```
 
-Bun auto-loads `.env`, so examples read `process.env.RADION_API_KEY` with no extra config.
+The scripts pass `--env-file-if-exists=.env` to Node, so examples read `process.env.RADION_API_KEY` from `.env` with no extra config.
 
 ## Run an example
 
-Each example is a single file. Pass arguments after `--` when using the npm-style scripts:
+Each example is a single file. Use the named scripts, or run a file directly with `tsx`:
 
 ```bash
-bun run websockets/01-copytrading-mirror/index.ts 0xWALLET
-# or
-bun run copytrade -- 0xWALLET
+pnpm run copytrade 0xWALLET
+# or run the file directly
+tsx --env-file-if-exists=.env websockets/01-copytrading-mirror/index.ts 0xWALLET
 ```
 
-| Script                  | Example               | Args                          |
-| ----------------------- | --------------------- | ----------------------------- |
-| `bun run copytrade`     | Copytrading mirror    | `0xWALLET…`                   |
-| `bun run wallet-alerts` | Wallet alerts         | `0xWALLET…`                   |
-| `bun run whales`        | Whale trade feed      | `[minUsd]`                    |
-| `bun run ticker`        | Live price ticker     | `[0xTOKEN…]`                  |
-| `bun run market`        | Single-market monitor | `--market 0x… \| --token 0x…` |
-| `bun run mempool`       | Mempool early alerts  | —                             |
-| `bun run resolutions`   | Resolution watcher    | —                             |
-| `bun run resilient`     | Resilient client      | —                             |
+| Script                   | Example               | Args                          |
+| ------------------------ | --------------------- | ----------------------------- |
+| `pnpm run copytrade`     | Copytrading mirror    | `0xWALLET…`                   |
+| `pnpm run wallet-alerts` | Wallet alerts         | `0xWALLET…`                   |
+| `pnpm run whales`        | Whale trade feed      | `[minUsd]`                    |
+| `pnpm run ticker`        | Live price ticker     | `[0xTOKEN…]`                  |
+| `pnpm run market`        | Single-market monitor | `--market 0x… \| --token 0x…` |
+| `pnpm run mempool`       | Mempool early alerts  | —                             |
+| `pnpm run resolutions`   | Resolution watcher    | —                             |
+| `pnpm run resilient`     | Resilient client      | —                             |
 
 ## Endpoints used
 
@@ -70,10 +70,10 @@ bun run copytrade -- 0xWALLET
 radion-examples/
 ├── README.md
 ├── .env.example           # RADION_API_KEY, RADION_WS, RADION_HTTP
-├── package.json           # bun scripts (one per example)
+├── package.json           # pnpm/tsx scripts (one per example)
 ├── tsconfig.json
 ├── shared/
-│   └── radion-ws.ts       # resilient client: connect + auth + backoff + resubscribe
+│   └── utils.ts           # display helpers + lifecycle logging on top of @radion-app/sdk
 └── websockets/
     ├── README.md          # channel → use-case map + per-example index
     ├── 01-copytrading-mirror/

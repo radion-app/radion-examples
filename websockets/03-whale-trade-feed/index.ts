@@ -8,10 +8,18 @@
  * Docs: https://docs.radion.app/websockets/channels/overview
  *
  * Run:
- *   bun run websockets/03-whale-trade-feed/index.ts [minUsd=10000]
+ *   tsx --env-file-if-exists=.env websockets/03-whale-trade-feed/index.ts [minUsd=10000]
  */
-import { connect, hexToUsdc, short } from "../../shared/radion-ws";
-import type { Frame } from "../../shared/radion-ws";
+import { Radion } from "@radion-app/sdk";
+
+import {
+  errorCode,
+  hexToUsdc,
+  onStatus,
+  payload,
+  requireApiKey,
+  short,
+} from "../../shared/utils";
 
 const minUsd = Number(process.argv[2] ?? 10_000);
 const TOP_N = 10;
@@ -36,23 +44,30 @@ const render = () => {
 
 console.log("Connecting…");
 
-connect({
-  onError: (f: Frame) => console.error("error:", f.code, f.message),
-  onEvent: (d) => {
-    const usd = hexToUsdc(d.takerAmountFilled);
-    board.push({
-      at: new Date().toISOString().slice(11, 19),
-      taker: d.taker ?? "",
-      token: d.tokenId ?? "",
-      usd,
-    });
-    if (board.length > 200) {
-      board.shift();
-    }
-    render();
-  },
-  onStatus: (s) => s !== "open" && console.log(`[${s}]`),
-  subscriptions: [
-    { channel: "large_trades", filters: { min_usd: minUsd }, id: "whales" },
-  ],
+const radion = new Radion({ apiKey: requireApiKey() });
+
+onStatus(radion.realtime, (s) => s !== "open" && console.log(`[${s}]`));
+radion.realtime.on("error", (err) =>
+  console.error("error:", errorCode(err), err.message)
+);
+radion.realtime.on("event", (e) => {
+  const d = payload(e);
+  const usd = hexToUsdc(d.takerAmountFilled);
+  board.push({
+    at: new Date().toISOString().slice(11, 19),
+    taker: d.taker ?? "",
+    token: d.tokenId ?? "",
+    usd,
+  });
+  if (board.length > 200) {
+    board.shift();
+  }
+  render();
 });
+
+radion.realtime.subscribe({
+  channel: "large_trades",
+  filters: { min_usd: minUsd },
+  id: "whales",
+});
+await radion.realtime.connect();
