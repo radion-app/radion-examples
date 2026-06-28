@@ -5,8 +5,8 @@
   "description": "Runnable examples for building on Radion's live Polymarket WebSocket data, using Node.js.",
   "type": "module",
   "scripts": {
-    "fix": "ultracite fix",
-    "check": "ultracite check",
+    "fix": "ultracite fix --type-aware --type-check",
+    "check": "ultracite check --type-aware --type-check",
     "typecheck": "tsc --noEmit",
     "copytrade": "tsx --env-file-if-exists=.env websockets/01-copytrading-mirror/index.ts",
     "wallet-alerts": "tsx --env-file-if-exists=.env websockets/02-wallet-alerts/index.ts",

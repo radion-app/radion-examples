@@ -22,10 +22,12 @@ console.log("Watching oracle resolutions…");
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
-onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.onLifecycle("error", (e) =>
-  console.error("error:", errorCode(e), e.message)
-);
+onStatus(radion.realtime, (s) => {
+  console.log(`[${s}]`);
+});
+radion.realtime.onLifecycle("error", (e) => {
+  console.error("error:", errorCode(e), e.message);
+});
 radion.realtime.onChannel("oracle", (e) => {
   const { type, questionID } = e.data;
   const time = new Date().toISOString().slice(11, 19);

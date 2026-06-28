@@ -34,10 +34,12 @@ console.log(
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
-onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.onLifecycle("error", (e) =>
-  console.error("error:", errorCode(e), e.message)
-);
+onStatus(radion.realtime, (s) => {
+  console.log(`[${s}]`);
+});
+radion.realtime.onLifecycle("error", (e) => {
+  console.error("error:", errorCode(e), e.message);
+});
 radion.realtime.onChannel("markets", (e) => {
   const { type } = e.data;
   counts.set(type, (counts.get(type) ?? 0) + 1);

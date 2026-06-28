@@ -24,42 +24,37 @@ if (wallets.length === 0) {
 
 // Friendly one-line summaries per event type; fall back to the raw type.
 const describe = (d: AnyConfirmedPayload): string => {
-  switch (d.type) {
-    case "order_filled_v1":
-    case "order_filled_v2": {
-      return `traded ${short(d.tokenId)} (${d.side === 1 ? "sell" : "buy"})`;
-    }
-    case "transfer": {
-      return `transferred to ${short(d.to)}`;
-    }
-    case "transfer_single":
-    case "transfer_batch": {
-      return `moved position token(s)`;
-    }
-    case "ctf_position_split": {
-      return `split collateral on ${short(d.conditionId)}`;
-    }
-    case "ctf_positions_merge": {
-      return `merged positions on ${short(d.conditionId)}`;
-    }
-    case "ctf_payout_redemption":
-    case "positions_redeemed": {
-      return `redeemed on ${short(d.conditionId)}`;
-    }
-    default: {
-      return d.type;
-    }
+  if (d.type === "order_filled_v1" || d.type === "order_filled_v2") {
+    return `traded ${short(d.tokenId)} (${d.side === 1 ? "sell" : "buy"})`;
   }
+  if (d.type === "transfer") {
+    return `transferred to ${short(d.to)}`;
+  }
+  if (d.type === "transfer_single" || d.type === "transfer_batch") {
+    return `moved position token(s)`;
+  }
+  if (d.type === "ctf_position_split") {
+    return `split collateral on ${short(d.conditionId)}`;
+  }
+  if (d.type === "ctf_positions_merge") {
+    return `merged positions on ${short(d.conditionId)}`;
+  }
+  if (d.type === "ctf_payout_redemption" || d.type === "positions_redeemed") {
+    return `redeemed on ${short(d.conditionId)}`;
+  }
+  return d.type;
 };
 
 console.log(`Watching ${wallets.length} wallet(s) for any activity…`);
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
-onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.onLifecycle("error", (e) =>
-  console.error("error:", errorCode(e), e.message)
-);
+onStatus(radion.realtime, (s) => {
+  console.log(`[${s}]`);
+});
+radion.realtime.onLifecycle("error", (e) => {
+  console.error("error:", errorCode(e), e.message);
+});
 radion.realtime.onChannel("wallets", (e) => {
   const time = new Date().toISOString().slice(11, 19);
   console.log(`🔔 ${time}  ${describe(e.data)}`);

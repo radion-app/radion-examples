@@ -15,7 +15,7 @@ export const errorCode = (err: Error): string | undefined =>
 /** Read `RADION_API_KEY` or exit with a friendly hint. */
 export const requireApiKey = (): string => {
   const apiKey = process.env.RADION_API_KEY;
-  if (!apiKey) {
+  if (apiKey === undefined || apiKey === "") {
     throw new Error(
       "Missing RADION_API_KEY. Copy .env.example to .env and set your key (https://radion.app)."
     );
@@ -31,18 +31,20 @@ export const onStatus = (
   realtime: RealtimeClient,
   report: (status: string, detail?: string) => void
 ): void => {
-  realtime.onLifecycle("open", () => report("open"));
-  realtime.onLifecycle("close", ({ code, reason }) =>
-    report("closed", `${code}${reason ? ` ${reason}` : ""}`)
-  );
-  realtime.onLifecycle("reconnect", ({ attempt, delayMs }) =>
-    report("reconnecting", `#${attempt} in ${delayMs}ms`)
-  );
+  realtime.onLifecycle("open", () => {
+    report("open");
+  });
+  realtime.onLifecycle("close", ({ code, reason }) => {
+    report("closed", `${code}${reason ? ` ${reason}` : ""}`);
+  });
+  realtime.onLifecycle("reconnect", ({ attempt, delayMs }) => {
+    report("reconnecting", `#${attempt} in ${delayMs}ms`);
+  });
 };
 
 /** Polymarket amounts arrive as hex strings. Convert to a USDC float (6 decimals). */
 export const hexToUsdc = (hex?: string): number => {
-  if (!hex) {
+  if (hex === undefined || hex === "") {
     return 0;
   }
   try {
@@ -54,7 +56,7 @@ export const hexToUsdc = (hex?: string): number => {
 
 /** Shorten a hex address/hash for display: 0x1234…abcd */
 export const short = (hex?: string): string => {
-  if (!hex || hex.length < 12) {
+  if (hex === undefined || hex.length < 12) {
     return hex ?? "";
   }
   return `${hex.slice(0, 6)}…${hex.slice(-4)}`;

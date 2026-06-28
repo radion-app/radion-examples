@@ -45,10 +45,14 @@ console.log("Connecting…");
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
-onStatus(radion.realtime, (s) => s !== "open" && console.log(`[${s}]`));
-radion.realtime.onLifecycle("error", (e) =>
-  console.error("error:", errorCode(e), e.message)
-);
+onStatus(radion.realtime, (s) => {
+  if (s !== "open") {
+    console.log(`[${s}]`);
+  }
+});
+radion.realtime.onLifecycle("error", (e) => {
+  console.error("error:", errorCode(e), e.message);
+});
 radion.realtime.onChannel("large_trades", (e) => {
   const d = e.data;
   const usd = hexToUsdc(d.takerAmountFilled);

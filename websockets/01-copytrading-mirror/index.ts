@@ -32,10 +32,12 @@ console.log(`Mirroring ${wallets.length} wallet(s). Waiting for fills…`);
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
-onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.onLifecycle("error", (e) =>
-  console.error("error:", errorCode(e), e.message)
-);
+onStatus(radion.realtime, (s) => {
+  console.log(`[${s}]`);
+});
+radion.realtime.onLifecycle("error", (e) => {
+  console.error("error:", errorCode(e), e.message);
+});
 radion.realtime.onChannel("trades", (e) => {
   const d = e.data;
   // Only v2 fills carry side/tokenId; handle both fill variants.

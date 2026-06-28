@@ -29,21 +29,23 @@ let reconnects = 0;
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
-radion.realtime.onLifecycle("open", () => console.log("[status] open"));
+radion.realtime.onLifecycle("open", () => {
+  console.log("[status] open");
+});
 radion.realtime.onLifecycle("reconnect", ({ attempt, delayMs }) => {
   reconnects = attempt;
   console.log(`[status] reconnecting (#${attempt} in ${delayMs}ms)`);
 });
-radion.realtime.onLifecycle("close", ({ code }) =>
-  console.log(`[status] closed (${code})`)
-);
+radion.realtime.onLifecycle("close", ({ code }) => {
+  console.log(`[status] closed (${code})`);
+});
 radion.realtime.onLifecycle("error", (e) => {
   const code = errorCode(e);
   if (code === "lagged") {
     console.warn("lagged: fell behind the buffer, some events were dropped");
     return;
   }
-  if (code && FATAL.has(code)) {
+  if (code !== undefined && FATAL.has(code)) {
     console.error("Fatal: API key revoked or revalidation failed. Stopping.");
     radion.realtime.close();
     process.exit(1);

@@ -31,15 +31,17 @@ console.log("Watching mempool.trades + trades. Reconciling by tx hash…");
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
-onStatus(radion.realtime, (s) => console.log(`[${s}]`));
-radion.realtime.onLifecycle("error", (e) =>
-  console.error("error:", errorCode(e), e.message)
-);
+onStatus(radion.realtime, (s) => {
+  console.log(`[${s}]`);
+});
+radion.realtime.onLifecycle("error", (e) => {
+  console.error("error:", errorCode(e), e.message);
+});
 
 radion.realtime.onChannel("mempool.trades", (e) => {
   const d = e.data;
   const hash = str(d.transaction_hash);
-  if (!hash) {
+  if (hash === undefined || hash === "") {
     return;
   }
   pendingSeen.set(
