@@ -13,7 +13,7 @@ Real use cases built on the Radion WebSocket (`wss://api.radion.app/ws`). Each e
 | `markets`                   | `market_ids`/`token_ids` | [05 Single-market monitor](./05-market-monitor/)      |
 | `mempool.trades` + `trades` | —                        | [06 Mempool early alerts](./06-mempool-early-alerts/) |
 | `oracle`                    | —                        | [07 Resolution watcher](./07-resolution-watcher/)     |
-| `global`                    | —                        | [08 Resilient client](./08-resilient-client/)         |
+| `trades`                    | —                        | [08 Resilient client](./08-resilient-client/)         |
 
 ## Examples
 
