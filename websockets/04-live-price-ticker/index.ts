@@ -2,21 +2,26 @@
  * Live price ticker
  *
  * Subscribe to specific outcome tokens and render a continuously-updating
- * last-traded price per token, with the direction of the last move.
+ * price per token, with the direction of the last move. Prices come from the
+ * CLOB price feed, `clob.prices` — the order-book-derived live price stream.
  *
- * Channel: `prices` with an optional `token_ids` filter. The `prices` payload is
- * the simple shape `{ token_id, price, timestamp_ms }` (no `data.type`).
- * Docs: https://docs.radion.app/websockets/channels/prices
+ * Channel: `clob.prices` with a required `token_ids` filter. The `clob.prices`
+ * payload is the simple shape `{ token_id, price, timestamp_ms }` (no
+ * `data.type`); the feed requires at least one token id.
+ * Docs: https://docs.radion.app/websockets/channels/clob
  *
  * Run:
  *   tsx --env-file-if-exists=.env websockets/04-live-price-ticker/index.ts 0xTOKEN [0xTOKEN...]
- *   (no args = all tokens)
  */
 import { Radion } from "@radion-app/sdk";
 
 import { errorCode, onStatus, requireApiKey, short } from "../../shared/utils";
 
 const tokenIds = process.argv.slice(2);
+if (tokenIds.length === 0) {
+  console.error("Usage: tsx index.ts 0xTOKEN [0xTOKEN...]");
+  process.exit(1);
+}
 const last = new Map<string, { price: number; dir: string }>();
 
 const render = () => {
@@ -35,11 +40,7 @@ const moveArrow = (price: number, prev?: number): string => {
   return price > prev ? "▲" : "▼";
 };
 
-console.log(
-  tokenIds.length
-    ? `Tracking ${tokenIds.length} token(s)…`
-    : "Tracking all tokens…"
-);
+console.log(`Tracking ${tokenIds.length} token(s)…`);
 
 const radion = new Radion({ apiKey: requireApiKey() });
 
@@ -51,7 +52,7 @@ onStatus(radion.realtime, (s) => {
 radion.realtime.onLifecycle("error", (e) => {
   console.error("error:", errorCode(e), e.message);
 });
-radion.realtime.onChannel("prices", (e) => {
+radion.realtime.onChannel("clob.prices", (e) => {
   const d = e.data;
   const prev = last.get(d.token_id)?.price;
   const dir = moveArrow(d.price, prev);
@@ -60,8 +61,8 @@ radion.realtime.onChannel("prices", (e) => {
 });
 
 radion.realtime.subscribe({
-  channel: "prices",
+  channel: "clob.prices",
+  filters: { token_ids: tokenIds },
   id: "ticker",
-  ...(tokenIds.length ? { filters: { token_ids: tokenIds } } : {}),
 });
 await radion.realtime.connect();

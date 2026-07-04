@@ -10,7 +10,7 @@
  *   - server error frames surfaced on the `error` event (e.g. `lagged`),
  *   - stop on `key_revoked` / `revalidation_failed`.
  *
- * It subscribes to `trades` and just reports lifecycle + throughput so you can
+ * It subscribes to `trading` and just reports lifecycle + throughput so you can
  * watch it survive drops. Kill your network for a few seconds to see it recover.
  *
  * Docs: https://docs.radion.app/websockets/connection-state
@@ -52,11 +52,11 @@ radion.realtime.onLifecycle("error", (e) => {
   }
   console.error("error:", code, e.message);
 });
-radion.realtime.onChannel("trades", () => {
+radion.realtime.onChannel("trading", () => {
   events += 1;
 });
 
-radion.realtime.subscribe({ channel: "trades", id: "g" });
+radion.realtime.subscribe({ channel: "trading", id: "g" });
 await radion.realtime.connect();
 
 // Periodic throughput report.

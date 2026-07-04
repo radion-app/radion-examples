@@ -4,20 +4,20 @@ Real use cases built on the Radion WebSocket (`wss://api.radion.app/ws`). Each e
 
 ## Use cases
 
-| Channel                     | Filter                   | Example                                               |
-| --------------------------- | ------------------------ | ----------------------------------------------------- |
-| `trades`                    | `wallets`                | [01 Copytrading mirror](./01-copytrading-mirror/)     |
-| `wallets`                   | `wallets` (req)          | [02 Wallet alerts](./02-wallet-alerts/)               |
-| `large_trades`              | `min_usd`                | [03 Whale trade feed](./03-whale-trade-feed/)         |
-| `prices`                    | `token_ids`              | [04 Live price ticker](./04-live-price-ticker/)       |
-| `markets`                   | `market_ids`/`token_ids` | [05 Single-market monitor](./05-market-monitor/)      |
-| `mempool.trades` + `trades` | —                        | [06 Mempool early alerts](./06-mempool-early-alerts/) |
-| `oracle`                    | —                        | [07 Resolution watcher](./07-resolution-watcher/)     |
-| `trades`                    | —                        | [08 Resilient client](./08-resilient-client/)         |
+| Channel | Filter | Example |
+| --- | --- | --- |
+| `trading` | `wallets` | [01 Copytrading mirror](./01-copytrading-mirror/) |
+| `wallets` | `wallets` (req) | [02 Wallet alerts](./02-wallet-alerts/) |
+| `trading` | `min_usd` | [03 Whale trade feed](./03-whale-trade-feed/) |
+| `clob.prices` | `token_ids` (req) | [04 Live price ticker](./04-live-price-ticker/) |
+| `markets` | `market_ids`/`token_ids` | [05 Single-market monitor](./05-market-monitor/) |
+| `mempool.trading` + `trading` | — | [06 Mempool early alerts](./06-mempool-early-alerts/) |
+| `resolution` | — | [07 Resolution watcher](./07-resolution-watcher/) |
+| `trading` | — | [08 Resilient client](./08-resilient-client/) |
 
 ## Examples
 
-### 01 — Copytrading mirror · `trades` (wallets filter)
+### 01 — Copytrading mirror · `trading` (wallets filter)
 
 Follow trader wallets; when a watched address fills an order, print the trade you'd mirror. The live counterpart to a copytrading backtest.
 
@@ -33,7 +33,7 @@ Alert on **any** activity for watched addresses — trades, transfers, redemptio
 pnpm run wallet-alerts 0xWALLET [0xWALLET...]
 ```
 
-### 03 — Whale trade feed · `large_trades` (min_usd)
+### 03 — Whale trade feed · `trading` (min_usd)
 
 Rolling leaderboard of the biggest fills above a USD threshold.
 
@@ -41,12 +41,12 @@ Rolling leaderboard of the biggest fills above a USD threshold.
 pnpm run whales [minUsd=10000]
 ```
 
-### 04 — Live price ticker · `prices` (token_ids)
+### 04 — Live price ticker · `clob.prices` (token_ids)
 
-Continuously-updating last-traded price per token, with move direction.
+Continuously-updating price per token from the CLOB price feed, with move direction. `clob.prices` requires at least one token id.
 
 ```bash
-pnpm run ticker [0xTOKEN...]
+pnpm run ticker 0xTOKEN [0xTOKEN...]
 ```
 
 ### 05 — Single-market monitor · `markets` (market_ids/token_ids)
@@ -58,7 +58,7 @@ pnpm run market --market 0xCONDITION_ID
 pnpm run market --token  0xTOKEN_ID
 ```
 
-### 06 — Mempool early alerts · `mempool.trades` + `trades`
+### 06 — Mempool early alerts · `mempool.trading` + `trading`
 
 Pending exchange transactions for early visibility, reconciled against confirmed trades by tx hash. Two subscriptions (fits the Free plan). _Quiet until the production mempool source is provisioned._
 
@@ -66,9 +66,9 @@ Pending exchange transactions for early visibility, reconciled against confirmed
 pnpm run mempool
 ```
 
-### 07 — Resolution watcher · `oracle`
+### 07 — Resolution watcher · `resolution`
 
-Print the instant a market's outcome is proposed or resolved (UMA oracle lifecycle).
+Print the instant a market's outcome is reported or resolved (settlement events).
 
 ```bash
 pnpm run resolutions

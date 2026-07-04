@@ -2,11 +2,12 @@
  * Wallet alerts
  *
  * Watch a set of addresses and emit an alert on ANY activity — trades, transfers,
- * redemptions, splits, merges. The `wallets` channel re-emits every event type
- * involving a watched address, so it's the firehose for "what is this wallet doing".
+ * redemptions, splits, merges. The `wallets` filter channel cuts across every
+ * topic and re-emits any event touching a watched address, so it's the
+ * everything-view for "what is this wallet doing".
  *
  * Channel: `wallets` (requires a non-empty `wallets` filter).
- * Docs: https://docs.radion.app/websockets/channels/overview#filtered-views
+ * Docs: https://docs.radion.app/websockets/filters
  *
  * Run:
  *   tsx --env-file-if-exists=.env websockets/02-wallet-alerts/index.ts 0xWALLET [0xWALLET...]
@@ -27,11 +28,8 @@ const describe = (d: AnyConfirmedPayload): string => {
   if (d.type === "order_filled_v1" || d.type === "order_filled_v2") {
     return `traded ${short(d.tokenId)} (${d.side === 1 ? "sell" : "buy"})`;
   }
-  if (d.type === "transfer") {
-    return `transferred to ${short(d.to)}`;
-  }
   if (d.type === "transfer_single" || d.type === "transfer_batch") {
-    return `moved position token(s)`;
+    return `moved position token(s) to ${short(d.to)}`;
   }
   if (d.type === "ctf_position_split") {
     return `split collateral on ${short(d.conditionId)}`;

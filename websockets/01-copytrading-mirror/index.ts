@@ -5,8 +5,8 @@
  * print the trade you'd mirror to copy their position. This is the live
  * counterpart to a copytrading backtest: same signal, in real time.
  *
- * Channel: `trades` with a `wallets` filter (only fills involving your wallets).
- * Docs: https://docs.radion.app/websockets/channels/trades
+ * Channel: `trading` with a `wallets` filter (only fills involving your wallets).
+ * Docs: https://docs.radion.app/websockets/channels/trading
  *
  * Run:
  *   tsx --env-file-if-exists=.env websockets/01-copytrading-mirror/index.ts 0xWALLET [0xWALLET...]
@@ -38,7 +38,7 @@ onStatus(radion.realtime, (s) => {
 radion.realtime.onLifecycle("error", (e) => {
   console.error("error:", errorCode(e), e.message);
 });
-radion.realtime.onChannel("trades", (e) => {
+radion.realtime.onChannel("trading", (e) => {
   const d = e.data;
   // Only v2 fills carry side/tokenId; handle both fill variants.
   const isFill = d.type === "order_filled_v1" || d.type === "order_filled_v2";
@@ -59,7 +59,7 @@ radion.realtime.onChannel("trades", (e) => {
 });
 
 radion.realtime.subscribe({
-  channel: "trades",
+  channel: "trading",
   filters: { wallets },
   id: "copy",
 });

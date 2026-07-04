@@ -4,8 +4,8 @@
  * Stream only fills above a USD threshold into a rolling leaderboard of the
  * biggest recent trades. Useful for "smart money" / large-flow dashboards.
  *
- * Channel: `large_trades` with a `min_usd` filter (server-side notional filter).
- * Docs: https://docs.radion.app/websockets/channels/overview
+ * Channel: `trading` with a `min_usd` filter (server-side notional threshold).
+ * Docs: https://docs.radion.app/websockets/channels/trading
  *
  * Run:
  *   tsx --env-file-if-exists=.env websockets/03-whale-trade-feed/index.ts [minUsd=10000]
@@ -53,7 +53,7 @@ onStatus(radion.realtime, (s) => {
 radion.realtime.onLifecycle("error", (e) => {
   console.error("error:", errorCode(e), e.message);
 });
-radion.realtime.onChannel("large_trades", (e) => {
+radion.realtime.onChannel("trading", (e) => {
   const d = e.data;
   const usd = hexToUsdc(d.takerAmountFilled);
   board.push({
@@ -69,7 +69,7 @@ radion.realtime.onChannel("large_trades", (e) => {
 });
 
 radion.realtime.subscribe({
-  channel: "large_trades",
+  channel: "trading",
   filters: { min_usd: minUsd },
   id: "whales",
 });
