@@ -43,7 +43,7 @@ pnpm run whales [minUsd=10000]
 
 ### 04 — Live price ticker · `clob.prices` (token_ids)
 
-Continuously-updating price per token from the CLOB price feed, with move direction. `clob.prices` requires at least one token id.
+Continuously-updating price per token from the CLOB price feed (`clob.prices`), with move direction. Requires at least one token id.
 
 ```bash
 pnpm run ticker 0xTOKEN [0xTOKEN...]

@@ -3,11 +3,10 @@
  *
  * Subscribe to specific outcome tokens and render a continuously-updating
  * price per token, with the direction of the last move. Prices come from the
- * CLOB price feed, `clob.prices` — the order-book-derived live price stream.
+ * CLOB price feed `clob.prices` — batched order-book price changes.
  *
- * Channel: `clob.prices` with a required `token_ids` filter. The `clob.prices`
- * payload is the simple shape `{ token_id, price, timestamp_ms }` (no
- * `data.type`); the feed requires at least one token id.
+ * Channel: `clob.prices` with a required `token_ids` filter. Each update carries
+ * a `changes` array; each entry has an `asset_id` and its new `price`.
  * Docs: https://docs.radion.app/websockets/channels/clob
  *
  * Run:
@@ -53,10 +52,13 @@ radion.realtime.onLifecycle("error", (e) => {
   console.error("error:", errorCode(e), e.message);
 });
 radion.realtime.onChannel("clob.prices", (e) => {
-  const d = e.data;
-  const prev = last.get(d.token_id)?.price;
-  const dir = moveArrow(d.price, prev);
-  last.set(d.token_id, { dir, price: d.price });
+  for (const change of e.data.changes) {
+    const prev = last.get(change.asset_id)?.price;
+    last.set(change.asset_id, {
+      dir: moveArrow(change.price, prev),
+      price: change.price,
+    });
+  }
   render();
 });
 
