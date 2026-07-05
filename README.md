@@ -35,6 +35,25 @@ pnpm install
 
 The scripts pass `--env-file-if-exists=.env` to Node, so examples read `process.env.RADION_API_KEY` from `.env` with no extra config.
 
+## Authentication
+
+These examples use a **secret key** (`rk_` / `sk_`), sent as `X-API-Key`:
+
+```ts
+const radion = new Radion({ apiKey: process.env.RADION_API_KEY });
+```
+
+For browser apps, the SDK (v0.5.0+) also supports a **public JWT** key (`pk_jwt_`) paired with a per-user JWT, and moves credentials to the WS query string automatically in the browser:
+
+```ts
+const radion = new Radion({
+  apiKey: "pk_jwt_...",
+  realtime: { token: () => fetchUserJwt() },
+});
+```
+
+Never ship a secret key to a browser — use a `pk_jwt_` key there. See the [SDK README](https://github.com/radion-app/radion-typescript#authentication).
+
 ## Run an example
 
 Each example is a single file. Use the named scripts, or run a file directly with `tsx`:
