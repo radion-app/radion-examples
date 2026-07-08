@@ -35,7 +35,8 @@ export const onStatus = (
     report("open");
   });
   realtime.onLifecycle("close", ({ code, reason }) => {
-    report("closed", `${code}${reason ? ` ${reason}` : ""}`);
+    const suffix = reason ? ` ${reason}` : "";
+    report("closed", `${code}${suffix}`);
   });
   realtime.onLifecycle("reconnect", ({ attempt, delayMs }) => {
     report("reconnecting", `#${attempt} in ${delayMs}ms`);
