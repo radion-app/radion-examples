@@ -1,7 +1,7 @@
 /**
  * Result assembly, formatting and persistence.
  *
- * `buildReport` merges the two probes into one plain object and derives the
+ * `buildReport` folds the probe result into one plain object and derives the
  * clock-skew verdict. `formatReport` renders the console tables. `writeReport`
  * persists the JSON. Formatting and skew detection are kept pure so they can be
  * unit-tested without a socket or a clock.
@@ -11,12 +11,12 @@ import path from "node:path";
 
 import type { LatencySummary } from "./histogram";
 import type {
-  OnewayResult,
+  HandshakeTimings,
+  ProbeResult,
   ReliabilityResult,
   SkewResult,
   ThroughputResult,
-} from "./oneway";
-import type { HandshakeTimings, RttResult } from "./rtt";
+} from "./probe";
 
 export interface BenchReport {
   startedAt: string;
@@ -46,20 +46,19 @@ export const detectSkew = (skew: SkewResult): boolean =>
 interface BuildReportParams {
   startedAt: string;
   config: BenchReport["config"];
-  rtt: RttResult;
-  oneway: OnewayResult;
+  probe: ProbeResult;
 }
 
 export const buildReport = (params: BuildReportParams): BenchReport => ({
-  clockSkewWarning: detectSkew(params.oneway.skew),
+  clockSkewWarning: detectSkew(params.probe.skew),
   config: params.config,
-  handshake: params.rtt.handshake,
-  oneway: params.oneway.oneway,
-  reliability: params.oneway.reliability,
-  rtt: params.rtt.rtt,
-  skew: params.oneway.skew,
+  handshake: params.probe.handshake,
+  oneway: params.probe.oneway,
+  reliability: params.probe.reliability,
+  rtt: params.probe.rtt,
+  skew: params.probe.skew,
   startedAt: params.startedAt,
-  throughput: params.oneway.throughput,
+  throughput: params.probe.throughput,
 });
 
 const ms = (n: number): string => `${n.toFixed(2)}ms`;
@@ -97,7 +96,7 @@ export const formatReport = (r: BenchReport): string => {
     `  pending ${perSec(r.throughput.pendingPerSec)} (${r.throughput.pendingEvents})  confirmed ${perSec(r.throughput.confirmedPerSec)} (${r.throughput.confirmedEvents})  over ${r.throughput.windowSec.toFixed(1)}s`,
     "",
     "Reliability",
-    `  lagged=${r.reliability.laggedEvents}  reconnects=${r.reliability.reconnects}`,
+    `  lagged=${r.reliability.laggedEvents}  skipped=${r.reliability.skippedEvents}  disconnects=${r.reliability.disconnects}`,
     ...skewLines,
     "────────────────────────────────────────────────────────────",
   ];

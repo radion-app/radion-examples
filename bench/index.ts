@@ -1,9 +1,9 @@
 /**
  * Radion WebSocket latency benchmark.
  *
- * Runs two probes concurrently over one window:
- *   - RttProbe (raw ws): handshake timings + transport RTT;
- *   - OnewayProbe (SDK): one-way delivery latency, throughput, reliability.
+ * One raw WebSocket connection (Free-plan friendly: 1 connection, 2
+ * subscriptions) measures handshake timings, transport RTT, one-way delivery,
+ * throughput and reliability over a single window.
  *
  * Prints a percentile summary and writes a JSON report. A warmup window is
  * discarded before measurement; Ctrl-C stops early and still reports.
@@ -14,9 +14,8 @@
  *   pnpm bench --ping-interval 500 --out ./out  # tune cadence / output dir
  */
 import { resolveConfig } from "./config";
-import { OnewayProbe } from "./oneway";
+import { BenchProbe } from "./probe";
 import { buildReport, formatReport, writeReport } from "./report";
-import { RttProbe } from "./rtt";
 
 /** A sleep that can be cut short (Ctrl-C, fatal error) to end a phase early. */
 class InterruptibleWait {
@@ -74,16 +73,9 @@ const main = async (): Promise<void> => {
     waiter.interrupt();
   };
 
-  const rttProbe = new RttProbe({
+  const probe = new BenchProbe({
     apiKey: cfg.apiKey,
     pingIntervalMs: cfg.pingIntervalMs,
-    wsUrl: cfg.wsUrl,
-  });
-  const onewayProbe = new OnewayProbe({
-    apiKey: cfg.apiKey,
-    onFatal: (code) => {
-      abort(`Fatal: ${code}. Stopping early.`);
-    },
     wsUrl: cfg.wsUrl,
   });
 
@@ -94,7 +86,7 @@ const main = async (): Promise<void> => {
   console.log(`Connecting to ${cfg.wsUrl}…`);
   try {
     await Promise.race([
-      Promise.all([rttProbe.start(), onewayProbe.start()]),
+      probe.start(),
       rejectAfter(CONNECT_TIMEOUT_MS, "Connection"),
     ]);
   } catch (error) {
@@ -102,10 +94,9 @@ const main = async (): Promise<void> => {
     console.error("Failed to connect:", message);
     console.error(
       "Hint: a 429 or timeout usually means the API key hit its rate/connection limit. " +
-        "The bench opens two connections (raw + SDK); wait a moment and retry."
+        "The Free plan allows one connection; close other clients using this key and retry."
     );
-    rttProbe.stop();
-    onewayProbe.stop();
+    probe.stop();
     process.exit(1);
   }
 
@@ -116,8 +107,7 @@ const main = async (): Promise<void> => {
     await waiter.wait(cfg.warmupSec * 1000);
   }
 
-  rttProbe.beginRecording();
-  onewayProbe.beginRecording();
+  probe.beginRecording();
 
   if (!aborting) {
     console.log(`Measuring ${cfg.durationSec}s… (Ctrl-C to stop early)`);
@@ -131,8 +121,7 @@ const main = async (): Promise<void> => {
       warmupSec: cfg.warmupSec,
       wsUrl: cfg.wsUrl,
     },
-    oneway: onewayProbe.stop(),
-    rtt: rttProbe.stop(),
+    probe: probe.stop(),
     startedAt,
   });
 

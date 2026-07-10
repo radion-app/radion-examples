@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import type { LatencySummary } from "./histogram";
-import type { OnewayResult } from "./oneway";
+import type { ProbeResult } from "./probe";
 import { buildReport, detectSkew, formatReport } from "./report";
-import type { RttResult } from "./rtt";
 
 const summary = (over: Partial<LatencySummary> = {}): LatencySummary => ({
   count: 10,
@@ -19,15 +18,12 @@ const summary = (over: Partial<LatencySummary> = {}): LatencySummary => ({
   ...over,
 });
 
-const rtt = (): RttResult => ({
+const probe = (skewOver: Partial<ProbeResult["skew"]> = {}): ProbeResult => ({
   handshake: { firstAckMs: 12, firstEventMs: 40, openMs: 30 },
-  rtt: summary(),
-});
-
-const oneway = (over: Partial<OnewayResult["skew"]> = {}): OnewayResult => ({
   oneway: summary({ count: 500 }),
-  reliability: { laggedEvents: 0, reconnects: 0 },
-  skew: { minRawMs: 3, negativeSamples: 0, ...over },
+  reliability: { disconnects: 0, laggedEvents: 0, skippedEvents: 0 },
+  rtt: summary(),
+  skew: { minRawMs: 3, negativeSamples: 0, ...skewOver },
   throughput: {
     confirmedEvents: 480,
     confirmedPerSec: 4.8,
@@ -44,6 +40,8 @@ const config = {
   wsUrl: "wss://api.radion.app/ws",
 };
 
+const startedAt = "2026-07-10T00:00:00.000Z";
+
 describe("detectSkew", () => {
   it("flags any negative sample", () => {
     expect(detectSkew({ minRawMs: -2, negativeSamples: 1 })).toBe(true);
@@ -57,13 +55,8 @@ describe("detectSkew", () => {
 });
 
 describe("buildReport", () => {
-  it("merges probes and marks no skew for clean deltas", () => {
-    const report = buildReport({
-      config,
-      oneway: oneway(),
-      rtt: rtt(),
-      startedAt: "2026-07-10T00:00:00.000Z",
-    });
+  it("folds the probe result and marks no skew for clean deltas", () => {
+    const report = buildReport({ config, probe: probe(), startedAt });
     expect(report.clockSkewWarning).toBe(false);
     expect(report.rtt.count).toBe(10);
     expect(report.oneway.count).toBe(500);
@@ -73,9 +66,8 @@ describe("buildReport", () => {
   it("marks skew when a negative delta was seen", () => {
     const report = buildReport({
       config,
-      oneway: oneway({ minRawMs: -7, negativeSamples: 4 }),
-      rtt: rtt(),
-      startedAt: "2026-07-10T00:00:00.000Z",
+      probe: probe({ minRawMs: -7, negativeSamples: 4 }),
+      startedAt,
     });
     expect(report.clockSkewWarning).toBe(true);
   });
@@ -84,32 +76,26 @@ describe("buildReport", () => {
 describe("formatReport", () => {
   it("renders every section with numbers", () => {
     const out = formatReport(
-      buildReport({
-        config,
-        oneway: oneway(),
-        rtt: rtt(),
-        startedAt: "2026-07-10T00:00:00.000Z",
-      })
+      buildReport({ config, probe: probe(), startedAt })
     );
     expect(out).toContain("RTT");
     expect(out).toContain("one-way");
     expect(out).toContain("Handshake");
     expect(out).toContain("Throughput");
     expect(out).toContain("Reliability");
+    expect(out).toContain("skipped=");
     expect(out).not.toContain("clock skew");
   });
 
   it("shows n/a for a missing first-ack and warns on skew", () => {
-    const r = buildReport({
-      config,
-      oneway: oneway({ minRawMs: -3, negativeSamples: 2 }),
-      rtt: {
-        handshake: { firstAckMs: null, firstEventMs: null, openMs: 30 },
-        rtt: summary(),
-      },
-      startedAt: "2026-07-10T00:00:00.000Z",
-    });
-    const out = formatReport(r);
+    const base = probe({ minRawMs: -3, negativeSamples: 2 });
+    const withNullAck: ProbeResult = {
+      ...base,
+      handshake: { firstAckMs: null, firstEventMs: null, openMs: 30 },
+    };
+    const out = formatReport(
+      buildReport({ config, probe: withNullAck, startedAt })
+    );
     expect(out).toContain("first-ack=n/a");
     expect(out).toContain("clock skew");
   });
