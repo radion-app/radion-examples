@@ -60,7 +60,7 @@ pnpm run market --token  0xTOKEN_ID
 
 ### 06 — Mempool early alerts · `mempool.trading` + `trading`
 
-Pending exchange transactions for early visibility, reconciled against confirmed trades by tx hash. Two subscriptions (fits the Free plan). _Quiet until the production mempool source is provisioned._
+Pending exchange transactions for early visibility, reconciled against confirmed trades by tx hash. Two subscriptions (fits the Free plan).
 
 ```bash
 pnpm run mempool

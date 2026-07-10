@@ -9,9 +9,6 @@
  * subscriptions, so this fits the Free plan (2 subs/connection).
  * Docs: https://docs.radion.app/websockets/mempool
  *
- * Note: emits nothing until the production mempool source is provisioned
- * (see POLYGON_MEMPOOL_WS_URL on the API). The confirmed half still works.
- *
  * Run:
  *   tsx --env-file-if-exists=.env websockets/06-mempool-early-alerts/index.ts
  */

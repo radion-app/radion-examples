@@ -53,10 +53,12 @@ radion.realtime.onLifecycle("error", (e) => {
 });
 radion.realtime.onChannel("clob.prices", (e) => {
   for (const change of e.data.changes) {
+    // clob.prices sends `price` as a string; coerce once to a number.
+    const price = Number(change.price);
     const prev = last.get(change.asset_id)?.price;
     last.set(change.asset_id, {
-      dir: moveArrow(change.price, prev),
-      price: change.price,
+      dir: moveArrow(price, prev),
+      price,
     });
   }
   render();
