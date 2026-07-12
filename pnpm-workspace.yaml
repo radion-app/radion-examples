@@ -1,4 +1,4 @@
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
-  - '@radion-app/sdk@0.7.0'
+  - "@radion-app/sdk@0.7.0"
