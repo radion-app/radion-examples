@@ -16,12 +16,13 @@
     "mempool": "tsx --env-file-if-exists=.env websockets/06-mempool-early-alerts/index.ts",
     "resolutions": "tsx --env-file-if-exists=.env websockets/07-resolution-watcher/index.ts",
     "resilient": "tsx --env-file-if-exists=.env websockets/08-resilient-client/index.ts",
+    "webhook-receiver": "tsx --env-file-if-exists=.env webhooks/01-webhook-receiver/index.ts",
     "bench": "tsx --env-file-if-exists=.env bench/index.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@radion-app/sdk": "^0.7.0"
+    "@radion-app/sdk": "^0.8.0"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",
@@ -30,7 +31,7 @@
     "oxfmt": "^0.58.0",
     "oxlint": "^1.73.0",
     "oxlint-tsgolint": "^0.24.0",
-    "tsx": "^4.23.0",
+    "tsx": "^4.23.1",
     "typescript": "^7.0.2",
     "ultracite": "^7.9.3",
     "vitest": "^4.1.10",
