@@ -17,6 +17,7 @@ pnpm run copytrade 0xWALLET
 | Area | Folder | Examples |
 | --- | --- | --- |
 | WebSockets | [`websockets/`](./websockets/) | Copytrading, wallet alerts, whale feed, price ticker, market monitor, mempool, resolution watcher, resilient client |
+| Webhooks | [`webhooks/`](./webhooks/) | Signed-delivery receiver: verify, parse, dedupe (SDK v0.8.0+) |
 
 The REST API can get its own top-level folder later.
 
@@ -74,6 +75,7 @@ tsx --env-file-if-exists=.env websockets/01-copytrading-mirror/index.ts 0xWALLET
 | `pnpm run mempool` | Mempool early alerts | — |
 | `pnpm run resolutions` | Resolution watcher | — |
 | `pnpm run resilient` | Resilient client | — |
+| `pnpm run webhook-receiver` | Webhook receiver | `[port]` (default 8787) |
 
 ## Endpoints used
 
@@ -93,14 +95,17 @@ radion-examples/
 ├── tsconfig.json
 ├── shared/
 │   └── utils.ts           # display helpers + lifecycle logging on top of @radion-app/sdk
-└── websockets/
-    ├── README.md          # channel → use-case map + per-example index
-    ├── 01-copytrading-mirror/
-    ├── 02-wallet-alerts/
-    ├── 03-whale-trade-feed/
-    ├── 04-live-price-ticker/
-    ├── 05-market-monitor/
-    ├── 06-mempool-early-alerts/
-    ├── 07-resolution-watcher/
-    └── 08-resilient-client/
+├── websockets/
+│   ├── README.md          # channel → use-case map + per-example index
+│   ├── 01-copytrading-mirror/
+│   ├── 02-wallet-alerts/
+│   ├── 03-whale-trade-feed/
+│   ├── 04-live-price-ticker/
+│   ├── 05-market-monitor/
+│   ├── 06-mempool-early-alerts/
+│   ├── 07-resolution-watcher/
+│   └── 08-resilient-client/
+└── webhooks/
+    ├── README.md          # setup (tunnel + dashboard endpoint) + per-example index
+    └── 01-webhook-receiver/
 ```
