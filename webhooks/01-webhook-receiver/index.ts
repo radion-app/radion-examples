@@ -36,17 +36,14 @@ const headerValue = (value: string | string[] | undefined): string =>
   Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 
 /** Collect the raw body as bytes — the signature covers them exactly. */
-const readBody = (request: IncomingMessage): Promise<Buffer> =>
-  new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    request.on("data", (chunk: Buffer) => {
-      chunks.push(chunk);
-    });
-    request.on("end", () => {
-      resolve(Buffer.concat(chunks));
-    });
-    request.on("error", reject);
-  });
+const readBody = async (request: IncomingMessage): Promise<Buffer> => {
+  const stream: AsyncIterable<Buffer> = request;
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+};
 
 const logEvent = (event: WebhookEvent): void => {
   const key = `${event.id}:${event.seq}`;
@@ -60,13 +57,13 @@ const logEvent = (event: WebhookEvent): void => {
 
   const time = new Date().toISOString().slice(11, 19);
   const feed = event.confirmed === false ? "pending" : "confirmed";
-  const kind = "type" in event.data ? event.data.type : event.channel;
+  const kind = "type" in event.data ? String(event.data.type) : event.channel;
   console.log(
     `📬 ${time}  ${event.channel} (${feed}) seq=${event.seq}  ${kind}`
   );
 };
 
-const handleDelivery = async (
+const deliver = async (
   request: IncomingMessage,
   response: ServerResponse
 ): Promise<void> => {
@@ -98,11 +95,20 @@ const handleDelivery = async (
   logEvent(event);
 };
 
-const server = createServer((request, response) => {
-  handleDelivery(request, response).catch((error: unknown) => {
+const handleDelivery = async (
+  request: IncomingMessage,
+  response: ServerResponse
+): Promise<void> => {
+  try {
+    await deliver(request, response);
+  } catch (error) {
     console.error("delivery failed:", error);
     response.writeHead(500).end();
-  });
+  }
+};
+
+const server = createServer((request, response) => {
+  void handleDelivery(request, response);
 });
 
 server.listen(port, () => {
